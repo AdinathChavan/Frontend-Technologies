@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   
+</head>
+<body>
+    <h1>Welcome to codehelp</h1>
+
+    <p>
+        Lorem, ipsum dolor sit amet consectetur adipisicing elit. At quas eveniet reiciendis harum debitis sed, facilis quam et saepe aliquid maiores officiis ducimus ipsum, sapiente ea. Facere quis voluptatum, eum alias fugiat nemo repellat, in, obcaecati ad dolore vitae distinctio quod impedit dicta accusantium officia doloribus! Sit maxime sunt voluptatum.
+    </p>
+ 
+    
+</body>
+
+<style>
+    h1{
+        background-color:bisque;
+        color: black;
+        border:solid red 3px;
+        text-align: center;
+    }
+   p{
+        background-color: azure;
+        border: solid red 3px;
+        margin: 70px;
+        padding-top: 10px;
+    }
+</style>
+</html>
