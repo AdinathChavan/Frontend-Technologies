@@ -1,0 +1,12 @@
+function manipulate(){
+
+    var h1Ref = document.getElementById("head1");
+    var pRef = document.getElementById("para");
+    var button = document.getElementById("button");
+
+    h1Ref.innerText="Dom changed";
+    pRef.innerText="lorem ipsum naur kerl perse ixmerrg, ipsum sunny goerg merit diklet dinpt";
+    button.innerText="SUBSCRIBED";
+}
+
+manipulate();
