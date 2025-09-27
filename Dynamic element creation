@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        div{
+            width: 40%;
+            align-content: center;
+            text-align: center;
+             margin:100px auto;
+            background-color: rgb(82, 155, 228);
+            color:black;
+            box-shadow: 0 0 10px;
+            padding:20px;
+        }
+        button{
+            margin:20px;
+            background-color: red;
+            color:white;
+            padding:20px;
+
+        }
+    </style>
+    <script>
+          function hideName(){
+            var hRef = document.getElementById("name");
+                hRef.type="password";
+          }
+          function showName(){
+            var hRef = document.getElementById("name");
+            hRef.type="text";
+          }
+
+          function addButton(){
+            var newButton = document.createElement("button")
+            newButton.innerText="Remove Button";
+            newButton.style.color= "white";
+            newButton.style.backgroundColor= "darkred";
+            document.getElementById("div1").appendChild(newButton);
+            newButton.onclick = function(){
+                newButton.remove();
+            }
+          }
+         
+    </script>
+</head>
+<body id="body">
+
+    <div id="div1">
+        <h1>UI TECHNOLOGIES</h1>
+        <input  id= "name" type="text" placeholder="enter your name"/><br>
+        <button id="submit" onclick="hideName()">submit</button><br>
+        <button id="delete" onclick="showName()">delete</button>
+        <br> <button id="newButton" onclick="addButton()">New button</button>
+    </div>
+    
+</body>
+</html>
