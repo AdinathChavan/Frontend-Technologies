@@ -1,0 +1,10 @@
+var [nme, id, cgpa, name, village] = ["Adinath", 23, 9.05, "Student", "Dattawad"];
+
+console.log(`name is ${nme} and id is ${id}`);
+
+function printName(){
+    console.log(`name is ${nme}`);
+}
+
+printName();
+
