@@ -1,0 +1,12 @@
+<script>
+    const Id = Symbol("id");
+    var product = {
+        [Id]:2235,
+         Name : "TV",
+         Price : 23000,
+         Stock : "Available",
+         Cities : ["Pune","Kolhapur","Mumbai"],
+         Rate : 4.5
+    }
+    document.write(`Name : ${product.Name}<br> Product Id : ${product.Id}<br> Price : ${product.Price} <br> Stock : ${product.Stock}<br>  Cities : ${product.Cities} <br> Rating : ${product.Rate}`);
+</script>
