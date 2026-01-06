@@ -1,0 +1,18 @@
+
+
+function printDetails(...details){
+
+    var[id, name, price, cities, rating] = details;
+
+    console.log(
+    `\n 
+    Id : ${id} \n
+    Name : ${name}\n
+    Price :  ${price}\n
+    Cities :  ${cities}\n
+    Rating :  ${rating}\n `
+    );
+}
+
+printDetails(23,"Samsung A5 pro", 45000.00, ["Pune","Mumbai","Kolhapur"], 5.4);
+
