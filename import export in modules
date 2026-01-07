@@ -1,0 +1,13 @@
+
+
+export const name = "Adinath";
+
+export function address(){
+    return "Dattawad, 416-107";
+}
+
+
+import {name, address} from "./module.js";
+
+console.log(name);
+console.log(address());
