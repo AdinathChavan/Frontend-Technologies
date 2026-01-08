@@ -1,0 +1,46 @@
+<script>
+
+    class Employee{
+        name;
+        id;
+        role;
+        address;
+
+        print(){
+            document.write(`name : ${this.name} <br> id : ${this.id} <br> role : ${this.role} <br> address : ${this.address} <br>`)
+        }
+    }
+
+    class Developer extends Employee {
+        name = "Adinath";
+        id= 23;
+        role = " Develope, build, test, deploy";
+        address = " Dattawad 416-107";
+
+        print(){
+            super.print();
+        }
+    }
+    
+    class Admin extends Employee {
+        name = "Admin";
+        id= 90;
+        role = "Manage and approval";
+            address = " Kolhapur 416-114";
+
+        print(){
+            super.print();
+        }
+    }
+
+    let Employeesss = new Array(new Admin(), new Developer());
+
+    var roleEnter = prompt("Enter your role..");
+
+    for( var emp of Employeesss){
+        if(emp.name==roleEnter){
+            emp.print();
+        }
+    }
+
+</script>
