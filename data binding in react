@@ -1,0 +1,28 @@
+
+import "./Databinding.css"
+
+export function Databind(){
+    
+    var products = [ { name : "TV", price : 23000, rate: 4.5, stock : true},
+                     { name : "mobile", price : 12000, rate: 5.4, stock: true},
+                     { name : "laptop", price : 56000, rate: 6.4, stock: true},
+                     { name : "PC", price : 43000, rate: 5.4, stock:true}
+    ]
+
+    return(
+        <div className="items">
+            {
+                products.map(product=>
+                    <div id="prd">
+                        <h1>Product Details </h1>
+                        <h4>{product.name}</h4>
+                        <h4>{product.price}</h4>
+                        <h4>{product.rate}</h4>
+                        <h4>{product.stock}</h4>
+                    </div>
+
+                )
+            }
+        </div>
+    )
+}
