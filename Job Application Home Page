@@ -1,0 +1,50 @@
+<header class="navbar">
+    <div class="logo">JobPortal</div>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#" routerLink="/jobs">Jobs</a>
+        <a href="#">Companies</a>
+        <a href="#" routerLink="/login">Login</a>
+        <button class="register-btn">Register</button>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>Find Your Dream Job Today 🚀</h1>
+        <p>Explore thousands of job opportunities with top companies.</p>
+
+        <div class="search-box">
+            <input type="text" placeholder="Job title or keyword">
+            <input type="text" placeholder="Location">
+            <button>Search</button>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <h2>Why Choose Us?</h2>
+    <div class="feature-container">
+        <div class="feature-card">
+            <h3>🔍 Easy Search</h3>
+            <p>Find jobs quickly with advanced filtering options.</p>
+        </div>
+        <div class="feature-card">
+            <h3>🏢 Top Companies</h3>
+            <p>Apply to jobs from leading companies worldwide.</p>
+        </div>
+        <div class="feature-card">
+            <h3>📄 Quick Apply</h3>
+            <p>Apply for jobs in just one click.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <h2>Ready to Start Your Career?</h2>
+    <button class="cta-btn">Browse Jobs</button>
+</section>
+
+<footer>
+    <p>© 2026 JobPortal | All Rights Reserved</p>
+</footer>
