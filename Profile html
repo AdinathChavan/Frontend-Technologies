@@ -1,0 +1,122 @@
+<ion-header>
+  <ion-toolbar class="profile-header">
+    
+    <ion-title><b>MY PROFILE</b></ion-title>
+    <ion-buttons slot="end">
+    
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="profile-content" [fullscreen]="true">
+
+  <!-- Hero Banner -->
+  <div class="hero-banner"></div>
+
+  <!-- Avatar -->
+  <div class="avatar-wrap">
+    <div class="avatar-ring">
+      <div class="avatar-inner">
+        <img src="assets/profile.png" alt="Dr. John Doe" class="avatar-img"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <span class="avatar-initials" style="display:none">JD</span>
+      </div>
+    </div>
+    <div class="verified-badge">
+      <ion-icon name="checkmark"></ion-icon>
+    </div>
+  </div>
+
+  <!-- Name Block -->
+  <div class="name-block">
+    <h2>Dr. John Doe</h2>
+    <div class="role-pill">
+      <span class="dot"></span>
+      Mathematics Faculty
+    </div>
+  </div>
+
+ 
+  <!-- Contact Info Card -->
+  <div class="section-card">
+    <div class="section-header">
+      <ion-icon name="person-outline"></ion-icon>
+      <span class="section-title">Contact Details</span>
+    </div>
+
+    <div class="info-row">
+      <div class="icon-box blue">
+        <ion-icon name="mail-outline"></ion-icon>
+      </div>
+      <div class="info-text-wrap">
+        <span class="info-label">Email Address</span>
+        <span class="info-value">john.doe@email.com</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+    </div>
+
+    <div class="info-row">
+      <div class="icon-box green">
+        <ion-icon name="call-outline"></ion-icon>
+      </div>
+      <div class="info-text-wrap">
+        <span class="info-label">Phone Number</span>
+        <span class="info-value">+91 98765 43210</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+    </div>
+  </div>
+
+  <!-- Academic Info Card -->
+  <div class="section-card">
+    <div class="section-header">
+      <ion-icon name="school-outline"></ion-icon>
+      <span class="section-title">Academic Info</span>
+    </div>
+
+    <div class="info-row">
+      <div class="icon-box purple">
+        <ion-icon name="school-outline"></ion-icon>
+      </div>
+      <div class="info-text-wrap">
+        <span class="info-label">Qualifications</span>
+        <span class="info-value">M.Sc, PhD — Mathematics</span>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="icon-box orange">
+        <ion-icon name="business-outline"></ion-icon>
+      </div>
+      <div class="info-text-wrap">
+        <span class="info-label">Institution</span>
+        <span class="info-value">XYZ College, Mumbai</span>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="icon-box blue">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <div class="info-text-wrap">
+        <span class="info-label">Joined</span>
+        <span class="info-value">August 2013</span>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Action Buttons -->
+  <div class="action-wrap">
+    <ion-button class="btn-primary" expand="block">
+      <ion-icon slot="start" name="create-outline"></ion-icon>
+      Edit Profile
+    </ion-button>
+    <ion-button class="btn-outline" expand="block" fill="outline" (click)="logout()">
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Logout
+    </ion-button>
+  </div>
+
+</ion-content>
