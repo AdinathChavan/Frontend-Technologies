@@ -1,0 +1,171 @@
+<ion-header>
+  <ion-toolbar class="header-toolbar">
+    <div class="header-inner">
+      <div class="header-icon">
+        <ion-icon name="school-outline" style="color:#1a2500;font-size:16px;"></ion-icon>
+      </div>
+      <ion-title class="header-title">Student Attendance</ion-title>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="attendance-content">
+  <div class="page-wrapper">
+
+    <!-- DATE + LIVE STATS STRIP -->
+    <div class="date-strip">
+      <div class="date-chip">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <span>{{ today | date:'EEE, d MMM y' }}</span>
+      </div>
+      <div class="stats-pills">
+        <span class="pill pill-present">
+          ✓ {{ presentCount() }} Present
+        </span>
+        <span class="pill pill-absent">
+          ✗ {{ absentCount() }} Absent
+        </span>
+      </div>
+    </div>
+
+    <!-- FILTER ROW -->
+    <div class="filter-section">
+      <div class="filter-label">Select Class</div>
+      <div class="filter-row">
+
+        <div class="filter-card branch">
+          <span class="filter-card-label">Branch</span>
+          <ion-item lines="none">
+            <ion-select
+              placeholder="Choose"
+              (ionChange)="selectedBranch.set($event.detail.value); checkAndLoadStudents()">
+              <ion-select-option value="Science">Science</ion-select-option>
+              <ion-select-option value="Commerce">Commerce</ion-select-option>
+              <ion-select-option value="Arts">Arts</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="filter-card division">
+          <span class="filter-card-label">Division</span>
+          <ion-item lines="none">
+            <ion-select
+              placeholder="Choose"
+              (ionChange)="selectedDivision.set($event.detail.value); checkAndLoadStudents()">
+              <ion-select-option value="A">Division A</ion-select-option>
+              <ion-select-option value="B">Division B</ion-select-option>
+              <ion-select-option value="C">Division C</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="filter-card shift">
+          <span class="filter-card-label">Shift</span>
+          <ion-item lines="none">
+            <ion-select
+              placeholder="Choose"
+              (ionChange)="onShiftChange($event); checkAndLoadStudents()">
+              <ion-select-option value="Morning">Morning</ion-select-option>
+              <ion-select-option value="Evening">Evening</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ATTENDANCE CARD -->
+    <div class="attendance-card">
+
+      <!-- Section Header -->
+      <div class="section-header">
+        <div class="section-title-group">
+          <div class="section-icon">
+            <ion-icon name="checkmark-done-outline"></ion-icon>
+          </div>
+          <div>
+            <div class="section-title">Mark Attendance</div>
+            <div class="section-subtitle">{{ filteredStudents().length }} students loaded</div>
+          </div>
+        </div>
+        <span class="count-badge">{{ filteredStudents().length }}</span>
+      </div>
+
+      <hr class="section-divider" />
+
+      <!-- Progress Bar (shows when students are loaded) -->
+      <div class="attendance-progress-wrap" *ngIf="filteredStudents().length > 0">
+        <div class="progress-header">
+          <span class="progress-label">Attendance Progress</span>
+          <span class="progress-pct">{{ attendancePct() }}%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" [style.width]="attendancePct() + '%'"></div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredStudents().length === 0" class="no-students">
+        <div class="empty-icon-wrap">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <p>No Students Found</p>
+        <small>Select Branch, Division & Shift to load students</small>
+      </div>
+
+      <!-- Student List -->
+      <ion-list class="student-list" *ngIf="filteredStudents().length > 0">
+        <ion-item
+          class="student-item"
+          [ngClass]="student.present ? 'present-row' : 'absent-row'"
+          lines="none"
+          *ngFor="let student of filteredStudents(); let i = index"
+          [style.animation-delay]="(i * 0.04) + 's'">
+
+          <div class="student-left" slot="start">
+            <div
+              class="student-avatar"
+              [ngClass]="student.present ? 'avatar-present' : 'avatar-absent'">
+              {{ student.name?.charAt(0)?.toUpperCase() }}
+            </div>
+            <div class="student-info">
+              <h3>{{ student.name }}</h3>
+              <p>Roll No: {{ student.roll }}</p>
+              <span
+                class="status-tag"
+                [ngClass]="student.present ? 'present-tag' : 'absent-tag'">
+                {{ student.present ? 'Present' : 'Absent' }}
+              </span>
+            </div>
+          </div>
+
+          <ion-toggle
+            slot="end"
+            [(ngModel)]="student.present"
+            class="attendance-toggle"
+            [ngClass]="student.present ? 'present-toggle' : 'absent-toggle'">
+          </ion-toggle>
+
+        </ion-item>
+      </ion-list>
+
+    </div>
+
+    <!-- SUBMIT BUTTON -->
+    <div class="submit-section">
+      <ion-button
+        expand="block"
+        class="submit-btn"
+        [disabled]="filteredStudents().length === 0"
+        (click)="submitAttendance()">
+        <div class="btn-inner">
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          Submit Attendance
+        </div>
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>
+
+<app-footer></app-footer>
