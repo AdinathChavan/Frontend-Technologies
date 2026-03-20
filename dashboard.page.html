@@ -1,0 +1,176 @@
+<ion-header class="animated-header">
+  <ion-toolbar>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="header-avatar">F</div>
+        <ion-title class="header-title">Dashboard</ion-title>
+      </div>
+      <div class="header-notif">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span class="notif-dot"></span>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="dashboard-content">
+  <div class="page-wrapper">
+
+    <!-- ── WELCOME BANNER ── -->
+    <div class="welcome-banner">
+      <div class="banner-top">
+        <div>
+          <div class="banner-greeting">Good Morning,</div>
+          <div class="banner-name">Faculty 👋</div>
+        </div>
+        <span class="banner-emoji">🎓</span>
+      </div>
+      <p class="banner-sub">Manage your classes, students and reports easily.</p>
+      <div class="banner-chips">
+        <span class="bchip">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ today | date :'EEE, d MMM' }}
+        </span>
+        <span class="bchip">
+          <ion-icon name="time-outline"></ion-icon>
+          Morning Shift
+        </span>
+        <span class="bchip">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Active
+        </span>
+      </div>
+    </div>
+
+    <!-- ── STATS SECTION ── -->
+    <div class="section-head">
+      <span class="section-head-title">Overview</span>
+      <span class="section-head-link">View All →</span>
+    </div>
+
+    <div class="stats-grid">
+
+      <div class="stat-card blue">
+        <div class="stat-icon-wrap">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <span class="stat-badge badge-up">↑ 4</span>
+        <div class="stat-number">120</div>
+        <div class="stat-label">Students</div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-icon-wrap">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <span class="stat-badge badge-info">Pending 3</span>
+        <div class="stat-number">24</div>
+        <div class="stat-label">Assignments</div>
+      </div>
+
+      <div class="stat-card amber">
+        <div class="stat-icon-wrap">
+          <ion-icon name="school-outline"></ion-icon>
+        </div>
+        <span class="stat-badge badge-info">Today</span>
+        <div class="stat-number">5</div>
+        <div class="stat-label">Classes Today</div>
+      </div>
+
+      <div class="stat-card teal">
+        <div class="stat-icon-wrap">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+        </div>
+        <span class="stat-badge badge-up">↑ 2</span>
+        <div class="stat-number">10</div>
+        <div class="stat-label">Reports</div>
+      </div>
+
+    </div>
+
+    <!-- ── QUICK ACTIONS ── -->
+    <div class="section-head">
+      <span class="section-head-title">Quick Actions</span>
+    </div>
+
+    <div class="quick-actions">
+      <div class="qa-grid">
+
+        <div class="qa-item" (click)="goTo('home')">
+          <div class="qa-icon blue">
+            <ion-icon name="home-outline"></ion-icon>
+          </div>
+          <span class="qa-label">Home</span>
+        </div>
+
+        <div class="qa-item" (click)="goTo('marks')">
+          <div class="qa-icon green">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <span class="qa-label">Marks</span>
+        </div>
+
+        <div class="qa-item" (click)="goTo('attendance')">
+          <div class="qa-icon amber">
+            <ion-icon name="clipboard-outline"></ion-icon>
+          </div>
+          <span class="qa-label">Attendance</span>
+        </div>
+
+        <div class="qa-item" (click)="goTo('profile')">
+          <div class="qa-icon slate">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span class="qa-label">Profile</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RECENT ACTIVITY ── -->
+    <div class="section-head">
+      <span class="section-head-title">Recent Activity</span>
+      <span class="section-head-link">See More →</span>
+    </div>
+
+    <div class="activity-card">
+
+      <div class="activity-row">
+        <div class="act-dot green">
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+        </div>
+        <div class="act-info">
+          <div class="act-title">Attendance Submitted</div>
+          <div class="act-sub">Science A — Morning</div>
+        </div>
+        <span class="act-time">9:10 AM</span>
+      </div>
+
+      <div class="activity-row">
+        <div class="act-dot blue">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <div class="act-info">
+          <div class="act-title">Marks Updated</div>
+          <div class="act-sub">Commerce B — Unit 2</div>
+        </div>
+        <span class="act-time">Yesterday</span>
+      </div>
+
+      <div class="activity-row">
+        <div class="act-dot amber">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+        </div>
+        <div class="act-info">
+          <div class="act-title">3 Assignments Pending</div>
+          <div class="act-sub">Arts C — Review needed</div>
+        </div>
+        <span class="act-time">Mon</span>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>
+
+
