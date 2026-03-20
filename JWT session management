@@ -1,0 +1,6 @@
+--------------JWT session managemenet------------
+
+important parts.
+1. auth.ts file --- for saving token and provide getter setter for the token 
+2. guard protection for routings --- generate guards
+3. in main file app.component.ts add ngOnInit function and apply conditon for /login and /dashboard
