@@ -1,0 +1,202 @@
+import { CommonModule, getLocaleMonthNames } from '@angular/common';
+import { Component, OnInit, Signal, ViewChild, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import {
+  AlertController,
+  IonModal,
+  IonicModule,
+  NavController,
+  ToastController,
+} from '@ionic/angular';
+
+// ── Faculty Model ──────────────────────────────────────────
+export interface Faculty {
+  email: string;
+  phone: string;
+  qualification: string;
+  institution: string;
+  joined: string;
+}
+
+@Component({
+  selector: 'app-edit-profile',
+  templateUrl: './edit.page.html',
+  styleUrls: ['./edit.page.scss'],
+  standalone: true,
+  imports: [IonicModule, CommonModule, FormsModule],
+})
+export class EditProfilePage implements OnInit {
+
+  @ViewChild('dateModal') dateModal!: IonModal;
+
+  // ── Signals ────────────────────────────────────────────
+  /** Live editable faculty data */
+
+  user = signal<any[]>([]);
+
+  data = signal<any[]>([]);
+
+
+  faculty = signal<Faculty>({
+    email: 'test.com@gmail.com',
+    phone: '9898989898',
+    qualification: 'M.Sc, PhD – Mathematics',
+    institution: 'XYZ College, Mumbai',
+    joined: '2013-08-01',
+  });
+
+  /** Snapshot of the last saved state — used for dirty checking & discard */
+  private savedSnapshot = signal<Faculty>({ ...this.faculty() });
+
+  /** Which input is currently focused */
+  focusedField = signal<string>('');
+
+  /** Whether a save operation is in progress */
+  isSaving = signal<boolean>(false);
+
+  // ── Computed Signals ────────────────────────────────────
+  /** True when the current state differs from the last saved snapshot */
+  isDirty = computed(() => {
+    const current = this.faculty();
+    const saved = this.savedSnapshot();
+    return (
+      current.qualification !== saved.qualification ||
+      current.institution   !== saved.institution   ||
+      current.joined        !== saved.joined
+    );
+  });
+
+  /** Display initials derived from institution name */
+  initials = computed(() => {
+    const name = this.faculty().institution?.trim();
+    if (!name) return 'FP';
+    const words = name.split(/\s+/).filter(Boolean);
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  });
+
+  /** Extract year from ISO joined date */
+  joinedYear = computed(() => {
+    const d = this.faculty().joined;
+    return d ? new Date(d).getFullYear() : null;
+  });
+
+  constructor(
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
+    private navCtrl: NavController,
+  ) {}
+
+
+  
+  ngOnInit(): void {
+
+    const stored = localStorage.getItem("user");
+    console.log(stored);
+
+    if (stored) {
+      this.data.set(JSON.parse(stored))
+    } 
+
+  }
+
+  /** Formats the joined date for display e.g. "1 Aug 2013" */
+  formattedDate = computed(() => {
+    const d = this.faculty().joined;
+    if (!d) return 'Select date';
+    return new Date(d).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+  });
+
+  // ── Field Update Helpers ────────────────────────────────
+  /** Handles text input changes immutably via signal update */
+  updateField(key: keyof Pick<Faculty, 'qualification' | 'institution'>, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.faculty.update(prev => ({ ...prev, [key]: value }));
+  }
+
+  /** Handles ion-datetime change events */
+  updateDateField(event: CustomEvent): void {
+    const value = event.detail.value as string;
+    if (value) {
+      // Normalize to YYYY-MM-DD
+      const normalized = value.split('T')[0];
+      this.faculty.update(prev => ({ ...prev, joined: normalized }));
+    }
+  }
+
+  /** Opens the date picker modal */
+  openDatePicker(): void {
+    this.focusedField.set('joined');
+    this.dateModal.present();
+  }
+
+  // ── Save ────────────────────────────────────────────────
+  async saveProfile(): Promise<void> {
+    if (!this.isDirty() || this.isSaving()) return;
+
+    this.isSaving.set(true);
+
+    try {
+      // ────────────────────────────────────────────────────
+      // Replace with your real API call, for example:
+      //
+      // const payload = this.faculty();
+      // await this.profileService.updateFaculty(payload).toPromise();
+      // ────────────────────────────────────────────────────
+
+      // Simulated network delay (remove in production)
+      await new Promise(resolve => setTimeout(resolve, 1400));
+
+      // Commit snapshot after successful save
+      this.savedSnapshot.set({ ...this.faculty() });
+
+      await this.showToast('✓ Profile saved successfully', 'primary');
+    } catch (error) {
+      console.error('Save failed:', error);
+      await this.showToast('Save failed. Please try again.', 'danger');
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  // ── Discard ─────────────────────────────────────────────
+  async discardChanges(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Discard Changes?',
+      message: 'Your unsaved changes will be lost.',
+      cssClass: 'custom-alert',
+      buttons: [
+        { text: 'Keep Editing', role: 'cancel', cssClass: 'alert-cancel' },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          cssClass: 'alert-destructive',
+          handler: () => {
+            this.faculty.set({ ...this.savedSnapshot() });
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+ 
+
+  // ── Toast Helper ────────────────────────────────────────
+  private async showToast(
+    message: string,
+    color: 'primary' | 'danger' | 'warning' = 'primary',
+  ): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2600,
+      position: 'top',
+      color,
+      cssClass: 'custom-toast',
+      buttons: [{ icon: 'close', role: 'cancel' }],
+    });
+    await toast.present();
+  }
+}
