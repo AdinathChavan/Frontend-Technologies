@@ -1,0 +1,199 @@
+<ion-content [fullscreen]="true" class="agri-content">
+
+  <!-- Ambient Background -->
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="grain"></div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">
+        <ion-icon name="leaf"></ion-icon>
+      </div>
+      <span class="brand-name">AgriConnect</span>
+    </div>
+    <div class="topbar-right">
+      <div class="weather-pill">
+        <ion-icon name="partly-sunny-outline"></ion-icon>
+        <span>28°C · Mumbai</span>
+      </div>
+      <div class="notif-btn" (click)="openNotifications()">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span class="notif-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Greeting -->
+  <div class="hero-section">
+    <div class="hero-left">
+      <p class="greeting-sub">Good Morning 🌾</p>
+      <h1 class="greeting-name">{{ user?.name || 'Farmer' }}</h1>
+      <p class="greeting-meta">
+        <ion-icon name="location-outline"></ion-icon>
+        {{ user?.village || 'Maharashtra, India' }}
+      </p>
+    </div>
+    <div class="hero-avatar">
+      <div class="avatar-ring">
+        <div class="avatar-inner">
+          <ion-icon name="person"></ion-icon>
+        </div>
+      </div>
+      <div class="avatar-badge">
+        <ion-icon name="checkmark"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat Cards Row -->
+  <div class="stats-row">
+    <div class="stat-card stat-land" (click)="navigate('land')">
+      <div class="stat-icon-wrap">
+        <ion-icon name="map-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ landCount }}</span>
+        <span class="stat-label">Land Records</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="stat-arrow"></ion-icon>
+    </div>
+
+    <div class="stat-card stat-scheme" (click)="navigate('schemes')">
+      <div class="stat-icon-wrap">
+        <ion-icon name="ribbon-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ schemeCount }}</span>
+        <span class="stat-label">Schemes</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="stat-arrow"></ion-icon>
+    </div>
+
+    <div class="stat-card stat-applied" (click)="navigate('applications')">
+      <div class="stat-icon-wrap">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ appliedCount }}</span>
+        <span class="stat-label">Applied</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="stat-arrow"></ion-icon>
+    </div>
+  </div>
+
+  <!-- Season Banner -->
+  <div class="season-banner">
+    <div class="season-left">
+      <span class="season-tag">Kharif Season 2025</span>
+      <h3 class="season-title">Crop Advisory Available</h3>
+      <p class="season-desc">Get personalised tips for your land</p>
+    </div>
+    <div class="season-art">
+      <ion-icon name="flower-outline"></ion-icon>
+    </div>
+    <ion-button fill="clear" class="season-btn" (click)="navigate('advisory')">
+      View <ion-icon name="arrow-forward"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section-header">
+    <h2 class="section-title">Quick Actions</h2>
+  </div>
+
+  <div class="actions-grid">
+    
+
+    <div class="action-tile" (click)="navigate('market')">
+      <div class="action-icon market">
+        <ion-icon name="storefront-outline"></ion-icon>
+      </div>
+      <span>Market Price</span>
+    </div>
+
+    <div class="action-tile" (click)="navigate('weather')">
+      <div class="action-icon weather">
+        <ion-icon name="rainy-outline"></ion-icon>
+      </div>
+      <span>Weather</span>
+    </div>
+
+    <div class="action-tile" (click)="navigate('helpline')">
+      <div class="action-icon help">
+        <ion-icon name="call-outline"></ion-icon>
+      </div>
+      <span>Helpline</span>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="section-header">
+    <h2 class="section-title">Recent Activity</h2>
+    <button class="see-all-btn" (click)="navigate('activity')">See all</button>
+  </div>
+
+  <div class="activity-list">
+    <div class="activity-card" *ngFor="let item of activities; let i = index"
+         [style.animation-delay]="i * 80 + 'ms'">
+      <div class="activity-dot" [ngClass]="item.type || 'default'"></div>
+      <div class="activity-content">
+        <p class="activity-title">{{ item.title }}</p>
+        <span class="activity-date">{{ item.date }}</span>
+      </div>
+      <div class="activity-status" [ngClass]="item.status || 'pending'">
+        {{ item.status || 'Pending' }}
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-activity" *ngIf="!activities || activities.length === 0">
+      <ion-icon name="leaf-outline"></ion-icon>
+      <p>No recent activity</p>
+    </div>
+  </div>
+
+  <!-- Spacer for footer -->
+  <div class="footer-spacer"></div>
+
+</ion-content>
+
+<!--Footer Tab-->
+<div class="custom-footer">
+  <div class="footer-tab" [class.active]="activeTab === 'home'" (click)="setTab('home')">
+    <div class="tab-icon-wrap">
+      <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
+    </div>
+    <span>Home</span>
+  </div>
+
+  <div class="footer-tab" [class.active]="activeTab === 'schemes'" (click)="setTab('schemes')">
+    <div class="tab-icon-wrap">
+      <ion-icon [name]="activeTab === 'schemes' ? 'ribbon' : 'ribbon-outline'"></ion-icon>
+    </div>
+    <span>Schemes</span>
+  </div>
+
+  <div class="footer-tab footer-center-tab" (click)="navigate('land')">
+    <div class="center-fab">
+      <ion-icon name="add"></ion-icon>
+    </div>
+  </div>
+
+  <div class="footer-tab" [class.active]="activeTab === 'applications'" (click)="setTab('applications')">
+    <div class="tab-icon-wrap">
+      <ion-icon [name]="activeTab === 'applications' ? 'document-text' : 'document-text-outline'"></ion-icon>
+    </div>
+    <span>Applied</span>
+  </div>
+
+  <div class="footer-tab" [class.active]="activeTab === 'profile'" (click)="setTab('profile')">
+    <div class="tab-icon-wrap">
+      <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>
+    </div>
+    <span>Profile</span>
+  </div>
+</div>
