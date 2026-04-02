@@ -1,0 +1,295 @@
+import { Component, computed, OnInit, signal } from '@angular/core';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import {
+  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonButtons, IonButton, IonIcon, IonFab, IonFabButton,
+  ModalController, AlertController
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  addOutline, arrowUpOutline, arrowDownOutline,
+  menuOutline, notificationsOutline, funnelOutline,
+  trendingUpOutline, trendingDownOutline, leafOutline,
+  receiptOutline
+} from 'ionicons/icons';
+import { Router } from '@angular/router';
+import { IonicModule, ToastController } from '@ionic/angular';
+import { ApiService } from 'src/app/services/api';
+
+// ─── INTERFACES ──────────────────────────────────────────
+export interface Transaction {
+  transactionId: string;
+  note: string;
+  crop: string;
+  category: string;
+  expenseType: 'income' | 'expense';
+  totalAmount: number;
+  createdAt: Date;
+}
+
+interface TransactionGroup {
+  date: string;
+  items: Transaction[];
+}
+
+// ─── COMPONENT ───────────────────────────────────────────
+@Component({
+  selector: 'app-expense',
+  templateUrl: './expenses.page.html',
+  styleUrls: ['./expenses.page.scss'],
+  standalone: true,
+  imports: [
+    IonicModule,CommonModule,FormsModule
+  ],
+})
+export class ExpensePage implements OnInit {
+
+  // ── State ─────────────────────────────────────────────
+  selectedView: 'monthly' | 'yearly' | 'crop' = 'monthly';
+  selectedCrop = 'All';
+  isScrolled = false;
+
+  farmerBudget = signal<any>([]);
+
+  // ── Crop list ─────────────────────────────────────────
+  cropList = ['All', 'Wheat', 'Rice', 'Sugarcane', 'Soyabean', 'Cotton'];
+
+  // ── Transactions Signal ───────────────────────────────
+  private _transactions = signal<Transaction[]>([]);
+
+  // ── Computed: Filtered Transactions ───────────────────
+  transactions = computed(() => {
+    let list = this._transactions();
+    if (this.selectedView === 'crop' && this.selectedCrop !== 'All') {
+      list = list.filter(t => t.crop === this.selectedCrop);
+    }
+    return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  });
+
+  // ── Computed: Grouped Transactions ────────────────────
+  groupedTransactions = computed((): TransactionGroup[] => {
+    const groups: { [key: string]: Transaction[] } = {};
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    for (const txn of this.transactions()) {
+      const d = new Date(txn.createdAt);
+      let label: string;
+
+      if (this.isSameDay(d, today)) {
+        label = 'Today';
+      } else if (this.isSameDay(d, yesterday)) {
+        label = 'Yesterday';
+      } else {
+        label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      if (!groups[label]) groups[label] = [];
+      groups[label].push(txn);
+    }
+
+    return Object.entries(groups).map(([date, items]) => ({ date, items }));
+  });
+
+  // ── Computed: Summaries ───────────────────────────────
+  
+  
+totalIncome = signal(0);
+totalExpense = signal(0);
+budget = signal(0);
+profit=signal(0);
+
+ 
+
+
+  budgetPercent = computed(() =>
+    Math.min(Math.round((this.totalExpense() / this.budget()) * 100), 100)
+  );
+
+  // ── Constructor ───────────────────────────────────────
+  constructor(
+    private modalCtrl: ModalController,
+    private alertCtrl: AlertController,
+    private router : Router,
+    private toastCtrol: ToastController,
+    private api : ApiService
+  ) {
+    addIcons({
+      addOutline, arrowUpOutline, arrowDownOutline,
+      menuOutline, notificationsOutline, funnelOutline,
+      trendingUpOutline, trendingDownOutline, leafOutline,
+      receiptOutline
+    });
+  }
+
+  ngOnInit() {
+    this.getBudget();
+    this.loadTransactions();
+  }
+
+  hasBudget = computed(() => this.budget() > 0);
+
+  // ── Methods ───────────────────────────────────────────
+
+  /** Handle page scroll to apply header shadow */
+  onScroll(event: CustomEvent) {
+    this.isScrolled = event.detail.scrollTop > 10;
+  }
+
+  /** Toggle sort order */
+  toggleSort() {
+    this._transactions.update(list =>
+      [...list].sort((a, b) =>
+        this.sortAsc
+          ? a.createdAt.getTime() - b.createdAt.getTime()
+          : b.createdAt.getTime() - a.createdAt.getTime()
+      )
+    );
+    this.sortAsc = !this.sortAsc;
+  }
+  private sortAsc = false;
+
+  /** View transaction detail */
+  async viewDetail(item: Transaction) {
+    const alert = await this.alertCtrl.create({
+      header: item.note,
+      subHeader: `${item.crop} • ${item.category}`,
+      message: `Amount: ₹${item.note.toLocaleString()}\nType: ${item.expenseType}\nDate: ${new Date(item.createdAt).toLocaleDateString('en-IN')}`,
+      buttons: [
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => this.deleteTransaction(item.transactionId),
+        },
+        { text: 'Close', role: 'cancel' },
+      ],
+    });
+    await alert.present();
+  }
+
+  /** Delete a transaction */
+  deleteTransaction(id: string) {
+    this._transactions.update(list => list.filter(t => t.transactionId !== id));
+  }
+
+  addExpense() {
+  this.router.navigate(['/budget']);
+}
+
+  /** Add new transaction via alert (replace with modal for production) */
+  async addTransaction() {
+    const alert = await this.alertCtrl.create({
+      header: 'Add Transaction',
+      inputs: [
+        { name: 'title',    type: 'text',   placeholder: 'Title (e.g. Urea Fertilizer)' },
+        { name: 'crop',     type: 'text',   placeholder: 'Crop (e.g. Wheat)' },
+        { name: 'category', type: 'text',   placeholder: 'Category (e.g. Input)' },
+        { name: 'amount',   type: 'number', placeholder: 'Amount (₹)' },
+        { name: 'type',     type: 'text',   placeholder: '"income" or "expense"' },
+      ],
+      buttons: [
+        {
+          text: 'Add',
+          handler: (data) => {
+            if (!data.title || !data.amount) return;
+
+            const newTxn: Transaction = {
+              transactionId: Date.now().toString(),
+              note: data.title,
+              crop: data.crop || 'General',
+              category: data.category || 'General',
+              expenseType: data.type === 'income' ? 'income' : 'expense',
+              totalAmount: parseFloat(data.amount),
+              createdAt: new Date(),
+            };
+
+            this._transactions.update(list => [newTxn, ...list]);
+          },
+        },
+        { text: 'Cancel', role: 'cancel' },
+      ],
+    });
+    await alert.present();
+  }
+
+  // ── Utilities ─────────────────────────────────────────
+  private isSameDay(a: Date, b: Date): boolean {
+    return (
+      a.getDate() === b.getDate() &&
+      a.getMonth() === b.getMonth() &&
+      a.getFullYear() === b.getFullYear()
+    );
+  }
+
+  goTo(url:string){
+    this.router.navigate([`/${url}`]);
+  }
+
+  addExpensePage(){
+    this.router.navigate(['/add-expense']);
+  }
+
+  getCurrentMonth(){
+    const today = new Date();
+    const month = today.getMonth()+1;
+    return month;
+  }
+  getCurrentYear(){
+    const today = new Date();
+    const year = today.getFullYear();
+    return year;
+  }
+
+  getBudget(){
+  
+    const data = {
+        farmerId:localStorage.getItem("userId"),
+        month:this.getCurrentMonth(),
+        year:this.getCurrentYear(),
+    }
+    console.log(data);
+    this.api.post("get-budget",data).subscribe({
+        next:(res:any)=>{
+          console.log(res);
+            localStorage.setItem("budgetId",res.data.budgetId);
+            this.farmerBudget.set(res.data);
+            this.profit.set(res.data.profit || 0);
+            this.totalExpense.set(res.data.totalExpense || 0);
+            this.totalIncome.set(res.data.totalIncome || 0);
+            this.budget.set(res.data.totalBudget || 0);
+        },
+        error:(err)=>{
+          console.log(err);
+        }
+    })
+    
+  }
+
+  loadTransactions(){
+
+    const id = String(localStorage.getItem("userId"));
+    console.log("-------------------------");
+    console.log(id);
+    this.api.getTransactionById(id).subscribe({
+      next:(res:any)=>{
+        console.log(res.data);
+        this._transactions.set(res.data);
+      },
+      error:(err)=>{
+        console.log(err);
+      }
+    })
+  }
+
+  
+  async showToast(message: string, color: string) {
+    const toast = await this.toastCtrol.create({
+      message,
+      duration: 2000,
+      color
+    });
+    toast.present();
+  }
+}
