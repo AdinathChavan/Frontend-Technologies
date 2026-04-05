@@ -1,0 +1,107 @@
+<!-- market.page.html -->
+<ion-content class="market-page">
+
+    <!-- Back Button -->
+  <button class="back-btn" (click)="goBack()">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+  </button>
+
+  <!-- HERO HEADER -->
+  <div class="hero">
+    <div class="hero-content">
+      <div class="badge"><span class="live-dot"></span> लाइव्ह दर</div>
+      <h1>बाजार भाव</h1>
+      <p>कोल्हापूर APMC — आजचे दर</p>
+    </div>
+  </div>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="stat-chip">
+      <span class="val">{{ totalCommodities() }}</span>
+      <span class="lbl">पिके</span>
+    </div>
+    <div class="stat-chip">
+      <span class="val">{{ totalMarkets() }}</span>
+      <span class="lbl">बाजार</span>
+    </div>
+    <div class="stat-chip">
+      <span class="val">↑4.2%</span>
+      <span class="lbl">सरासरी बदल</span>
+    </div>
+  </div>
+
+  <!-- FILTER PILLS -->
+ <div class="search-bar">
+  <ion-icon name="search-outline" class="search-icon"></ion-icon>
+  <input
+    type="text"
+    placeholder="पिक किंवा बाजार शोधा..."
+    [value]="searchTerm()"
+    (input)="onSearch($event)"
+  />
+</div>
+
+
+  <div class="section-label">आजची आवक</div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading()" class="loading-wrap">
+    <ion-spinner name="crescent"></ion-spinner>
+    <span>नवीन दर घेत आहे...</span>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards" *ngIf="!loading()">
+    <div class="card" *ngFor="let item of paginatedRecords(); let i = index"
+         [style.animation-delay]="(i * 0.06) + 's'">
+
+      <div class="card-top">
+        <span class="commodity-name">{{ getCommodityMarathi(item.Commodity) }}</span>
+        <span class="date-badge">📅 {{ item.Arrival_Date }}</span>
+      </div>
+
+      <div class="market-row">📍 {{ item.Market }}</div>
+
+      <div class="divider"></div>
+
+      <div class="prices-grid">
+        <div class="price-cell min">
+          <span class="plabel">किमान</span>
+          <span class="pval"><span class="rupee">₹</span>{{ item.Min_Price }}</span>
+        </div>
+        <div class="price-cell modal modal-accent">
+          <span class="plabel">मोडल</span>
+          <span class="pval"><span class="rupee">₹</span>{{ item.Modal_Price }}</span>
+        </div>
+        <div class="price-cell max">
+          <span class="plabel">कमाल</span>
+          <span class="pval"><span class="rupee">₹</span>{{ item.Max_Price }}</span>
+        </div>
+      </div>
+
+      <!-- Modal position bar -->
+      <div class="trend-bar-wrap">
+        <div class="trend-bar-bg">
+          <div class="trend-bar-fill"
+               [style.width]="getModalPercent(item) + '%'"></div>
+        </div>
+        <span class="trend-label">मोडल दर {{ getModalPercent(item) }}% श्रेणीत आहे</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pagination">
+  <button (click)="prevPage()" [disabled]="currentPage() === 1">
+    ⬅ मागे
+  </button>
+
+  <span>पृष्ठ {{ currentPage() }} / {{ totalPages() }}</span>
+
+  <button (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+    पुढे ➡
+  </button>
+</div>
+
+</ion-content>
