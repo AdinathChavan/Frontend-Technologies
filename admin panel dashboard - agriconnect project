@@ -1,0 +1,631 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { ApiService } from '../../services/api';
+import { FarmerView } from '../farmer-view/farmer-view';
+import { computed } from '@angular/core';
+import { effect } from '@angular/core';
+import { compileOpaqueAsyncClassMetadata } from '@angular/compiler';
+
+export interface Farmer {
+  id: string;
+  name: string;
+  mobile: number;
+  address: string;
+  adharNo:number;
+  pincode:number;
+
+  // @Id
+	// private String farmerId;
+	
+	// private String name;
+	// private long mobile;
+	// private String address;
+	// private long password;
+	// private long pincode;
+	// private long adharNo;
+
+}
+
+export interface SchemeApplication {
+  farmerId: string;
+  name: string;
+  income:number;
+  date: string;
+  status: string;
+  category:string;
+}
+
+export interface MarketData {
+  crop: string;
+  price: number;
+  change: number;
+  unit: string;
+  market: string;
+  updatedAt: string;
+}
+
+export interface LandRecord {
+  id: string;
+  farmerId: string;
+  farmerName: string;
+  surveyNumber: string;
+  area: number;
+  village: string;
+  cropSeason: string;
+  soilType: string;
+  verified: boolean;
+}
+
+export interface ExpenseRecord {
+  id: string;
+  farmerId: string;
+  farmerName: string;
+  category: string;
+  amount: number;
+  date: string;
+  description: string;
+}
+
+@Component({
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.html',
+  styleUrls: ['./dashboard.css'],
+  imports:[CommonModule,FormsModule, FarmerView]
+})
+export class Dashboard implements OnInit, OnDestroy {
+
+  // ─── UI State ────────────────────────────────────────────────────────────────
+  activeSection = 'dashboard';
+  sidebarCollapsed = false;
+  notificationPanelOpen = false;
+  profileMenuOpen = false;
+  searchQuery = '';
+  currentTime = new Date();
+  private clockInterval: any;
+
+  userData = signal<any>([]);
+
+
+totalPendingSchemes = computed(() => 
+  this.schemes().filter(s => s.status === 'pending').length
+);
+
+totalApprovedSchemes = computed(() => 
+  this.schemes().filter(s => s.status === 'approved').length
+);
+
+totalRejectedSchemes = computed(() => 
+  this.schemes().filter(s => s.status === 'rejected').length
+);
+
+  constructor(private router : Router,
+    private api :ApiService
+  ){}
+
+  // ─── Dashboard Stats ──────────────────────────────────────────────────────────
+  stats = [
+    { label: 'Total Farmers', value: '12,480', icon: '👨‍🌾', change: '+8.2%', positive: true, color: 'blue' },
+    { label: 'Active Schemes', value: '342', icon: '📋', change: '+5.1%', positive: true, color: 'green' },
+    { label: 'Land Records', value: '9,821', icon: '🗺️', change: '+3.4%', positive: true, color: 'orange' },
+    { label: 'Pending Applications', value: '1,204', icon: '⏳', change: '-2.1%', positive: false, color: 'purple' },
+  ];
+
+  recentActivities = [
+    { text: 'Ramesh Kumar applied for PM-KISAN scheme', time: '2 min ago', icon: '📋', type: 'scheme' },
+    { text: 'New land record added for Suresh Patel', time: '8 min ago', icon: '🗺️', type: 'land' },
+    { text: 'Expense logged by Anita Devi – ₹4,200 seeds', time: '15 min ago', icon: '💰', type: 'expense' },
+    { text: 'Market price alert: Tomato ↑ 12% in Nashik', time: '22 min ago', icon: '📈', type: 'market' },
+    { text: 'Vikram Singh profile verified', time: '35 min ago', icon: '✅', type: 'profile' },
+    { text: 'Weather alert issued for Pune district', time: '1 hr ago', icon: '🌧️', type: 'weather' },
+  ];
+
+  cropDistribution = [
+    { crop: 'Wheat', percent: 32, color: '#f59e0b' },
+    { crop: 'Rice', percent: 28, color: '#3b82f6' },
+    { crop: 'Cotton', percent: 18, color: '#a78bfa' },
+    { crop: 'Sugarcane', percent: 14, color: '#22c55e' },
+    { crop: 'Others', percent: 8, color: '#64748b' },
+  ];
+
+  monthlyRegistrations = [
+    { month: 'Oct', count: 380 },
+    { month: 'Nov', count: 420 },
+    { month: 'Dec', count: 390 },
+    { month: 'Jan', count: 510 },
+    { month: 'Feb', count: 480 },
+    { month: 'Mar', count: 620 },
+    { month: 'Apr', count: 540 },
+  ];
+
+  // ─── Farmers ──────────────────────────────────────────────────────────────────
+  farmers = signal<Farmer[]>([]);
+
+  farmerFilter = 'all';
+  farmerSearch = '';
+
+
+  // ─── Schemes ──────────────────────────────────────────────────────────────────
+   schemes = signal<SchemeApplication[]>([]);
+
+  schemeFilter = signal<any>("all");
+
+
+  filteredSchemes = computed(() => {
+  const filter = this.schemeFilter();
+  const schemes = this.schemes();
+
+  if (filter === 'all') return schemes;
+
+  return schemes.filter(s => s.status === filter);
+});
+
+
+  getApplications(){
+
+    this.api.get("applications").subscribe({
+      next:(res:any)=>{
+        this.schemes.set(res.data);
+        console.log(res.data);
+      },
+      error:(err)=>{
+        console.log(err);
+      }
+    })
+  }
+
+
+  // ─── Market Data ──────────────────────────────────────────────────────────────
+  marketData: MarketData[] = [
+    { crop: 'Tomato', price: 2800, change: 12.4, unit: 'quintal', market: 'Nashik APMC', updatedAt: '10:30 AM' },
+    { crop: 'Wheat', price: 2150, change: -1.2, unit: 'quintal', market: 'Pune APMC', updatedAt: '10:28 AM' },
+    { crop: 'Rice (Basmati)', price: 3800, change: 4.5, unit: 'quintal', market: 'Nagpur APMC', updatedAt: '10:25 AM' },
+    { crop: 'Cotton', price: 6200, change: -3.1, unit: 'quintal', market: 'Aurangabad APMC', updatedAt: '10:20 AM' },
+    { crop: 'Sugarcane', price: 350, change: 0.8, unit: 'quintal', market: 'Kolhapur APMC', updatedAt: '10:18 AM' },
+    { crop: 'Onion', price: 1500, change: -8.2, unit: 'quintal', market: 'Nashik APMC', updatedAt: '10:15 AM' },
+    { crop: 'Soybean', price: 4200, change: 2.1, unit: 'quintal', market: 'Latur APMC', updatedAt: '10:10 AM' },
+  ];
+
+  // ─── Land Records ─────────────────────────────────────────────────────────────
+  landRecords: LandRecord[] = [
+    { id: 'L001', farmerId: 'F001', farmerName: 'Ramesh Kumar', surveyNumber: 'MH-NK-142', area: 4.5, village: 'Igatpuri', cropSeason: 'Rabi 2024', soilType: 'Black Cotton', verified: true },
+    { id: 'L002', farmerId: 'F002', farmerName: 'Sunita Devi', surveyNumber: 'MH-NK-287', area: 2.2, village: 'Chandwad', cropSeason: 'Kharif 2024', soilType: 'Red Laterite', verified: true },
+    { id: 'L003', farmerId: 'F003', farmerName: 'Manoj Patil', surveyNumber: 'MH-NK-391', area: 6.1, village: 'Nandgaon', cropSeason: 'Rabi 2024', soilType: 'Alluvial', verified: false },
+    { id: 'L004', farmerId: 'F004', farmerName: 'Anita Sharma', surveyNumber: 'MH-NK-445', area: 3.8, village: 'Yeola', cropSeason: 'Kharif 2024', soilType: 'Black Cotton', verified: true },
+    { id: 'L005', farmerId: 'F005', farmerName: 'Vikram Singh', surveyNumber: 'MH-NK-512', area: 5.0, village: 'Sinnar', cropSeason: 'Rabi 2024', soilType: 'Sandy Loam', verified: false },
+  ];
+
+  // ─── Expenses ─────────────────────────────────────────────────────────────────
+  expenses: ExpenseRecord[] = [
+    { id: 'E001', farmerId: 'F001', farmerName: 'Ramesh Kumar', category: 'Seeds', amount: 4200, date: '2025-03-05', description: 'Wheat seeds 50kg' },
+    { id: 'E002', farmerId: 'F002', farmerName: 'Sunita Devi', category: 'Fertilizer', amount: 6800, date: '2025-03-08', description: 'Urea + DAP combo pack' },
+    { id: 'E003', farmerId: 'F003', farmerName: 'Manoj Patil', category: 'Labour', amount: 12000, date: '2025-03-12', description: 'Harvesting labour 10 days' },
+    { id: 'E004', farmerId: 'F004', farmerName: 'Anita Sharma', category: 'Pesticide', amount: 3500, date: '2025-03-18', description: 'Fungicide spray' },
+    { id: 'E005', farmerId: 'F005', farmerName: 'Vikram Singh', category: 'Equipment', amount: 18000, date: '2025-03-22', description: 'Rented tractor for ploughing' },
+    { id: 'E006', farmerId: 'F006', farmerName: 'Priya Joshi', category: 'Irrigation', amount: 2800, date: '2025-03-28', description: 'Drip irrigation maintenance' },
+  ];
+
+  expenseCategories = [
+    { label: 'Seeds', total: 42000, icon: '🌱', color: '#22c55e' },
+    { label: 'Fertilizer', total: 68000, icon: '🧪', color: '#3b82f6' },
+    { label: 'Labour', total: 120000, icon: '👷', color: '#f59e0b' },
+    { label: 'Pesticide', total: 35000, icon: '💊', color: '#ef4444' },
+    { label: 'Equipment', total: 180000, icon: '🚜', color: '#a78bfa' },
+    { label: 'Irrigation', total: 28000, icon: '💧', color: '#06b6d4' },
+  ];
+
+  // ─── Notifications ────────────────────────────────────────────────────────────
+  notifications = [
+    { id: 1, title: 'New Scheme Application', message: 'Ramesh Kumar applied for PM-KISAN', time: '2 min ago', read: false, type: 'scheme' },
+    { id: 2, title: 'Weather Alert', message: 'Heavy rain forecast in Nashik district', time: '15 min ago', read: false, type: 'weather' },
+    { id: 3, title: 'Market Price Update', message: 'Onion prices dropped 8% today', time: '30 min ago', read: true, type: 'market' },
+    { id: 4, title: 'Land Record Pending', message: '3 land records awaiting verification', time: '1 hr ago', read: true, type: 'land' },
+  ];
+
+  get unreadCount(): number {
+    return this.notifications.filter(n => !n.read).length;
+  }
+
+  // ─── Nav Items ────────────────────────────────────────────────────────────────
+  navItems = [
+    { id: 'dashboard', label: 'Gov. Schemes', icon: '🏠' },
+    { id: 'farmers', label: 'Farmers', icon: '👨‍🌾' },
+    { id: 'schemes', label: 'Applications', icon: '📋' },
+    { id: 'market', label: 'Market Prices', icon: '📈' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+  ];
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.clockInterval = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
+
+    this.loadFarmers();
+    this.getApplications();
+    this.loadSchemes();
+    this.getMarket();
+    this.setUser(); 
+  }
+
+
+  //get farmers 
+  loadFarmers(){
+    this.api.get("farmers").subscribe({
+      next:(res:any)=>{
+        this.farmers.set(res.data);
+        console.log(res.data);
+      },
+      error:(err)=>{
+        console.log(err);
+      }
+    })
+
+  }
+
+  
+
+  ngOnDestroy(): void {
+    if (this.clockInterval) clearInterval(this.clockInterval);
+  }
+
+  
+ selectedFarmer: any = null;
+
+openFarmer(farmer: any) {
+  console.log("open farmer..."+farmer);
+  this.selectedFarmer = farmer;
+}
+  // ─── Methods ──────────────────────────────────────────────────────────────────
+  setSection(section: string): void {
+    this.activeSection = section;
+    this.notificationPanelOpen = false;
+    this.profileMenuOpen = false;
+  }
+
+  getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .join('');
+}
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  toggleNotifications(): void {
+    this.notificationPanelOpen = !this.notificationPanelOpen;
+    this.profileMenuOpen = false;
+  }
+
+  toggleProfileMenu(): void {
+    this.profileMenuOpen = !this.profileMenuOpen;
+    this.notificationPanelOpen = false;
+  }
+
+  markAllRead(): void {
+    this.notifications.forEach(n => n.read = true);
+  }
+
+  getStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      active: 'status-active',
+      inactive: 'status-inactive',
+      pending: 'status-pending',
+      approved: 'status-approved',
+      rejected: 'status-rejected',
+      under_review: 'status-review',
+    };
+    return map[status] || '';
+  }
+
+  getStatusLabel(status: string): string {
+    return status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  getBarHeight(count: number): string {
+    const max = Math.max(...this.monthlyRegistrations.map(m => m.count));
+    return `${(count / max) * 100}%`;
+  }
+
+  getExpenseBarWidth(total: number): string {
+    const max = Math.max(...this.expenseCategories.map(e => e.total));
+    return `${(total / max) * 100}%`;
+  }
+
+  get totalExpenses(): number {
+    return this.expenseCategories.reduce((sum, e) => sum + e.total, 0);
+  }
+
+  get greeting(): string {
+    const h = this.currentTime.getHours();
+    if (h < 12) return 'Good Morning';
+    if (h < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+
+  approveScheme(id: string): void {
+    const s = this.schemes().find(s => s.farmerId === id);
+    if (s) s.status = 'approved';
+  }
+
+  rejectScheme(id: string): void {
+    const s = this.schemes().find(s => s.farmerId === id);
+    if (s) s.status = 'rejected';
+  }
+
+  verifyLand(id: string): void {
+    const l = this.landRecords.find(l => l.id === id);
+    if (l) l.verified = true;
+  }
+
+
+
+
+  
+activeIndex: number | null = null;
+
+toggleActions(index: number) {
+  this.activeIndex = this.activeIndex === index ? null : index;
+}
+
+acceptFarmer(farmer: any, i:any) {
+
+  console.log("Accepted", farmer);
+  console.log(i); 
+
+  farmer.status = "approved";
+
+  console.log(farmer);
+
+  this.api.put("applications/update",farmer).subscribe({
+
+    next:(res:any)=>{
+        console.log(res);
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+  })
+
+}
+
+rejectFarmer(farmer: any, i:any) {
+  console.log("Rejected", farmer);
+
+  console.log(i);
+
+  farmer.status = "rejected";
+
+  console.log(farmer);
+
+  this.api.put("applications/update",farmer).subscribe({
+
+    next:(res:any)=>{
+        console.log(res);
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+  })
+
+}
+
+
+//add scheme form 
+
+showForm = false;
+
+scheme: any = this.getEmptyScheme();
+
+openForm() {
+  console.log("open form called..");
+  this.showForm = true;
+}
+
+closeForm() {
+  this.showForm = false;
+  this.scheme = this.getEmptyScheme();
+}
+
+getEmptyScheme() {
+  return {
+    name: '',
+    description: '',
+    eligibility: {},
+    benefits: '',
+    applyLink: '',
+    category: '',
+    type: 'STATE',
+    state: '',
+    startDate: '',
+    endDate: '',
+    requiredDocuments: [],
+    active: true
+  };
+}
+
+addDocument(doc: string) {
+  if (doc.trim()) {
+    this.scheme.requiredDocuments.push(doc);
+  }
+}
+
+removeDoc(index: number) {
+  this.scheme.requiredDocuments.splice(index, 1);
+}
+
+saveScheme() {
+  console.log("Scheme Data:", this.scheme);
+
+  this.api.post("add-scheme", this.scheme).subscribe({
+    next:(res:any)=>{
+      console.log(res);
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+  })
+
+  alert("Scheme Added Successfully");
+
+  this.closeForm();
+}
+
+
+objectKeys = Object.keys;
+
+allSchemes= signal<any[]>([]);
+
+loadSchemes(){
+
+  this.api.get("all-schemes").subscribe({
+    next:(res:any)=>{
+      this.allSchemes.set(res.data);
+      console.log(res.data);
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+  })
+}
+
+deleteScheme(id :any){
+  console.log("delete method called....");
+  
+  this.api.deleteBySchemeId(id).subscribe({
+    next:(res:any)=>{
+      console.log(res);
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+  })
+}
+
+
+//market 
+
+marketProducts = signal<any[]>([]);
+
+getMarket(){
+
+let state = JSON.parse(localStorage.getItem("state") || 'null');
+let district = JSON.parse(localStorage.getItem("district") || 'null');
+
+
+  if(state==null){
+    console.log("Null state and district ...");
+    state = "Maharashtra";
+    district = "Kolhapur";
+  }
+
+  this.api.getMarketData(state, district).subscribe({
+    next:(res:any)=>{
+      console.log(state,district);
+      console.log(res.records);
+      this.marketProducts.set(res.records);
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+  })
+}
+
+searchTerm = signal('');
+
+filteredMarketProducts = computed(() => {
+  const term = this.searchTerm().toLowerCase();
+  const data = this.marketProducts();
+
+  if (!term) return data;
+
+  return data.filter(item =>
+    item.Commodity.toLowerCase().includes(term) ||
+    item.Market.toLowerCase().includes(term) ||
+    item.District.toLowerCase().includes(term)
+  );
+});
+
+
+setUser(){
+  this.userData.set(JSON.parse(localStorage.getItem("user") || ''));
+  console.log(this.userData());
+}
+
+logout(){
+  localStorage.clear();
+  this.router.navigate(['']);
+}
+ 
+
+username=''
+password=0
+name=''
+mobile=0
+cpassword=0
+npassword=0
+
+
+
+updateAdmin(){
+
+  console.log("cpassword",this.cpassword);//old pass
+    console.log("npassword",this.npassword);//new pass
+      console.log("password",this.password);//current pass
+
+
+  if(this.cpassword==0){
+    this.cpassword=this.userData().password;
+  }
+
+  if(this.cpassword == this.npassword){
+    console.log("Enter new Password....");
+    return;
+  }
+  if(this.password != this.npassword){
+    console.log("enter same password in both feilds confirm and password...");
+  }
+
+  const data = {
+    id:this.userData().id,
+    username:this.username,
+    password:this.password,
+    name:this.name,
+    mobile:this.mobile,
+ }
+
+ if(data.username ==''){
+  data.username=this.userData().username;
+ }
+ if(data.password==0){
+  data.password=this.userData().password;
+ }
+ if(data.mobile ==0){
+  data.mobile=this.userData().mobile;
+ }
+ if(data.name ==''){
+  data.name=this.userData().name;
+ }
+
+ console.log(data);
+
+ this.api.put("update",data).subscribe({
+  next:(res:any)=>{
+    console.log("response.....");
+    this.userData.set(res.data);
+    localStorage.setItem("user",JSON.stringify(res.data));
+    console.log(res); 
+    alert("Profile update successfull....");
+  },
+  error:(err)=>{
+    console.log(err);
+  }
+
+ })
+}
+}
+
