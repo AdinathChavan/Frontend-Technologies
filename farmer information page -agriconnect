@@ -1,0 +1,55 @@
+<div class="modal-backdrop" (click)="close()"></div>
+
+<div class="modal-box">
+
+  <h2 class="title">👨‍🌾 Farmer Profile</h2>
+
+  <!-- PERSONAL INFO -->
+  <div class="section">
+    <h3>Personal Information</h3>
+    <p><strong>Farmer ID:</strong> {{ farmers()?.farmerId }}</p>
+    <p><strong>DOB:</strong> {{ farmers()?.dob }}</p>
+    <p><strong>Gender:</strong> {{ farmers()?.gender }}</p>
+    <p><strong>Category:</strong> {{ farmers()?.category }}</p>
+    <p><strong>Mobile:</strong> {{ farmers()?.anotherMobile }}</p>
+    <p><strong>Email:</strong> {{ farmers()?.email }}</p>
+  </div>
+
+  <!-- ADDRESS -->
+  <div class="section">
+    <h3>Address</h3>
+    <p><strong>Village:</strong> {{ farmers()?.village }}</p>
+    <p><strong>Taluka:</strong> {{ farmers()?.taluka }}</p>
+    <p><strong>District:</strong> {{ farmers()?.district }}</p>
+    <p><strong>State:</strong> {{ farmers()?.state }}</p>
+    <p><strong>Pincode:</strong> {{ farmers()?.pincode }}</p>
+  </div>
+
+  <!-- FARMING -->
+  <div class="section">
+    <h3>Farming Details</h3>
+    <p><strong>Experience:</strong> {{ farmers()?.yearsOfExperience }} years</p>
+    <p><strong>Total Land:</strong> {{ farmers()?.totalLand }} acres</p>
+    <p><strong>Land Type:</strong> {{ farmers()?.landType }}</p>
+    <p><strong>Irrigation:</strong> {{ farmers()?.irrigation }}</p>
+    <p><strong>Primary Crop:</strong> {{ farmers()?.primaryCrop }}</p>
+    <p><strong>Farming Type:</strong> {{ farmers()?.farmingType }}</p>
+
+    <p><strong>Other Crops:</strong></p>
+    <ul>
+      <li *ngFor="let crop of farmers()?.crops">{{ crop }}</li>
+    </ul>
+  </div>
+
+  <!-- BANK -->
+  <div class="section">
+    <h3>Bank Details</h3>
+    <p><strong>Bank:</strong> {{ farmers()?.bankName }}</p>
+    <p><strong>Account No:</strong> {{ farmers()?.accountNo }}</p>
+    <p><strong>IFSC:</strong> {{ farmers()?.ifscCode }}</p>
+    <p><strong>Branch:</strong> {{ farmers()?.branch }}</p>
+  </div>
+
+  <button class="close-btn" (click)="close()">Close</button>
+
+</div>
