@@ -1,0 +1,27 @@
+<html>
+
+    <head>
+        <script>
+
+            function loadCities(){
+            var cities = ["Kolhapur","Pune","Mumbai", "Satara", "Sangli"];
+            var ref = document.getElementById("content");
+
+            for(var c of cities){
+                var con = document.createElement("div");
+                con.innerHTML=`<h2>${c}</h2> <br>`;
+                ref.append(con);
+            }
+        }
+        </script>
+    </head>
+
+    <body>
+        <button onclick="loadCities()">Load Cities </button>
+
+        <div id="content" >
+
+        </div>
+
+    </body>
+</html>
